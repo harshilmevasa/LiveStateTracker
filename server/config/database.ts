@@ -1,4 +1,16 @@
 import { MongoClient, Db } from 'mongodb';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from root directory (local development only)
+// In production, environment variables are set by the platform (Railway, Azure, etc.)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '../../.env') });
+}
 
 // Get MongoDB connection details from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;

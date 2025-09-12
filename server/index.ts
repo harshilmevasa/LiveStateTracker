@@ -13,8 +13,11 @@ import { setupSocketHandlers } from './sockets/bookingSocket.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root directory (local development only)
+// In production, environment variables are set by the platform (Railway, Azure, etc.)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '../.env') });
+}
 
 const app = express();
 const server = createServer(app);
