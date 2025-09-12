@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   define: {
-    'process.env.VITE_API_URL': mode === 'production' 
+    'import.meta.env.VITE_API_URL': mode === 'production' 
       ? '"https://livestatetracker-production.up.railway.app"'
       : '"http://localhost:3001"'
   }
