@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Auto-detect the correct API URL based on environment
+const getApiUrl = () => {
+  // If we have a specific API URL set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // In production (deployed), use the same domain as the frontend
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.protocol}//${window.location.host}`;
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:3001';
+};
+
+const API_BASE_URL = getApiUrl();
 
 interface ApiResponse<T> {
   data: T | null;

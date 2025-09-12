@@ -42,7 +42,23 @@ interface SocketData {
   cityStats: CityStats[];
 }
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Auto-detect the correct socket URL based on environment
+const getSocketUrl = () => {
+  // If we have a specific API URL set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // In production (deployed), use the same domain as the frontend
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.protocol}//${window.location.host}`;
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:3001';
+};
+
+const SOCKET_URL = getSocketUrl();
 
 export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -56,6 +72,7 @@ export const useSocket = () => {
 
   useEffect(() => {
     const connectSocket = () => {
+      console.log('🔌 Attempting to connect to WebSocket server at:', SOCKET_URL);
       const newSocket = io(SOCKET_URL, {
         transports: ['websocket', 'polling'],
         timeout: 20000,
