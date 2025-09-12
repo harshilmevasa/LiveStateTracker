@@ -36,7 +36,9 @@ app.use(express.json());
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from the React app build directory
-  app.use(express.static(path.join(__dirname, '../dist')));
+  const distPath = path.join(__dirname, '../dist');
+  console.log('Static files path:', distPath);
+  app.use(express.static(distPath));
 }
 
 // Routes
@@ -50,7 +52,9 @@ app.get('/health', (req, res) => {
 // Catch all handler: send back React's index.html file in production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(__dirname, '../dist/index.html');
+    console.log('Serving index.html from:', indexPath);
+    res.sendFile(indexPath);
   });
 }
 
