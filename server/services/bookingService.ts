@@ -50,14 +50,34 @@ export class BookingService {
   async getRecentBookings(limit: number = 10): Promise<BookingEvent[]> {
     try {
       const db = this.getDatabase();
+      
+      // Use aggregation to properly handle invalid dates
       const bookings = await db
         .collection<BookingEvent>(COLLECTIONS.BOOKINGS)
-        .find({})
-        .sort({ createdAt: -1 })
-        .limit(limit)
+        .aggregate([
+          this.getCreatedAtDateStage(),
+          { $sort: { createdAtDate: -1 } },
+          { $limit: limit },
+          {
+            $addFields: {
+              // Replace the original createdAt with the fixed date as string
+              createdAt: {
+                $dateToString: {
+                  date: "$createdAtDate",
+                  format: "%Y-%m-%dT%H:%M:%S.%LZ"
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              createdAtDate: 0 // Remove the helper field
+            }
+          }
+        ])
         .toArray();
       
-      return bookings;
+      return bookings as BookingEvent[];
     } catch (error) {
       console.error('Error fetching recent bookings:', error);
       throw error;
@@ -922,7 +942,12 @@ export class BookingService {
                 appointmentDateTime: "$appointmentDateTime",
                 visaClass: "$visaClass",
                 groupSize: "$groupSize",
-                createdAt: "$createdAt"
+                createdAt: {
+                  $dateToString: {
+                    date: "$createdAtDate",
+                    format: "%Y-%m-%dT%H:%M:%S.%LZ"
+                  }
+                }
               }
             }
           }

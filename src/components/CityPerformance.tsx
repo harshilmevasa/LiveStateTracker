@@ -28,12 +28,24 @@ export default function CityPerformance() {
   };
 
   const formatBookingDate = (createdAt: string) => {
-    const date = new Date(createdAt);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
+    try {
+      const date = new Date(createdAt);
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid createdAt date:', createdAt);
+        return 'Invalid Date';
+      }
+      
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting createdAt date:', createdAt, error);
+      return 'Invalid Date';
+    }
   };
 
   if (error) {
