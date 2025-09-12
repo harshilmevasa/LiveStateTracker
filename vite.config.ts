@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env.VITE_API_URL': mode === 'production' 
-      ? '"https://livestatetracker-d9bxg5ggdqckfhf4.canadacentral-01.azurewebsites.net"'
+      ? '"https://livestatetracker-production.up.railway.app"'
       : '"http://localhost:3001"'
   }
 }));
