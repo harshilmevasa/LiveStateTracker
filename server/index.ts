@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { connectDB } from './config/database.js';
 import bookingRoutes from './routes/bookings.js';
@@ -35,7 +36,6 @@ app.use(express.json());
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  const fs = require('fs');
   
   // Multiple possible locations for static files
   const possiblePaths = [
@@ -84,7 +84,6 @@ app.get('/health', (req, res) => {
 // Catch all handler: send back React's index.html file in production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    const fs = require('fs');
     
     // Multiple possible locations for index.html
     const possibleIndexPaths = [
