@@ -122,6 +122,7 @@ async function seedDatabase() {
     await db.collection(COLLECTIONS.BOOKINGS).deleteMany({});
     await db.collection(COLLECTIONS.CITY_STATS).deleteMany({});
     await db.collection(COLLECTIONS.USER_STATS).deleteMany({});
+    await db.collection(COLLECTIONS.CITY_LOCATIONS).deleteMany({});
     
     // Generate and insert booking events
     console.log('📊 Generating booking events...');
@@ -140,6 +141,17 @@ async function seedDatabase() {
     const userStats = generateUserStats(bookings);
     await db.collection(COLLECTIONS.USER_STATS).insertOne(userStats as any);
     console.log('✅ Inserted user statistics');
+    
+    // Initialize city locations if they don't exist
+    console.log('🌍 Initializing city locations...');
+    const cityLocationsCount = await db.collection(COLLECTIONS.CITY_LOCATIONS).countDocuments();
+    if (cityLocationsCount === 0) {
+      const { BookingService } = await import('../services/bookingService.js');
+      const bookingService = new BookingService();
+      await bookingService.initializeCityLocations();
+    } else {
+      console.log('✅ City locations already exist');
+    }
     
     console.log('🎉 Database seeding completed successfully!');
     

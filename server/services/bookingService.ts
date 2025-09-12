@@ -1,5 +1,5 @@
 import { getDB } from '../config/database.js';
-import { BookingEvent, CityStats, DailyStats, UserStats, DashboardStats, COLLECTIONS } from '../models/Booking.js';
+import { BookingEvent, CityStats, DailyStats, UserStats, DashboardStats, CityLocation, COLLECTIONS } from '../models/Booking.js';
 
 export class BookingService {
   private getDatabase() {
@@ -698,24 +698,174 @@ export class BookingService {
     }
   }
 
+  // Initialize city locations in the database if they don't exist
+  async initializeCityLocations(): Promise<void> {
+    try {
+      const db = this.getDatabase();
+      const collection = db.collection<CityLocation>(COLLECTIONS.CITY_LOCATIONS);
+      
+      // Check if city locations collection exists and has data
+      const existingCount = await collection.countDocuments();
+      
+      if (existingCount === 0) {
+        console.log('🌍 Initializing city locations...');
+        
+        // Default Canadian city locations
+        const defaultCities: CityLocation[] = [
+          {
+            city: 'Halifax',
+            country: 'Canada',
+            lat: 44.6488,
+            lng: -63.5752,
+            timezone: 'America/Halifax',
+            region: 'Atlantic',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Vancouver',
+            country: 'Canada',
+            lat: 49.2827,
+            lng: -123.1207,
+            timezone: 'America/Vancouver',
+            region: 'Pacific',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Ottawa',
+            country: 'Canada',
+            lat: 45.4215,
+            lng: -75.6972,
+            timezone: 'America/Toronto',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Toronto',
+            country: 'Canada',
+            lat: 43.6532,
+            lng: -79.3832,
+            timezone: 'America/Toronto',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Montreal',
+            country: 'Canada',
+            lat: 45.5017,
+            lng: -73.5673,
+            timezone: 'America/Toronto',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Calgary',
+            country: 'Canada',
+            lat: 51.0447,
+            lng: -114.0719,
+            timezone: 'America/Edmonton',
+            region: 'Mountain',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Winnipeg',
+            country: 'Canada',
+            lat: 49.8951,
+            lng: -97.1384,
+            timezone: 'America/Winnipeg',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Quebec City',
+            country: 'Canada',
+            lat: 46.8139,
+            lng: -71.2080,
+            timezone: 'America/Toronto',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Edmonton',
+            country: 'Canada',
+            lat: 53.5461,
+            lng: -113.4938,
+            timezone: 'America/Edmonton',
+            region: 'Mountain',
+            isActive: true,
+            lastUpdated: new Date()
+          },
+          {
+            city: 'Saskatoon',
+            country: 'Canada',
+            lat: 52.1332,
+            lng: -106.6700,
+            timezone: 'America/Regina',
+            region: 'Central',
+            isActive: true,
+            lastUpdated: new Date()
+          }
+        ];
+        
+        await collection.insertMany(defaultCities);
+        console.log(`✅ Initialized ${defaultCities.length} city locations`);
+      }
+    } catch (error) {
+      console.error('Error initializing city locations:', error);
+    }
+  }
+
+  // Get city coordinates from the database
+  async getCityCoordinates(cityName: string): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const db = this.getDatabase();
+      const cityLocation = await db.collection<CityLocation>(COLLECTIONS.CITY_LOCATIONS)
+        .findOne({ city: cityName, isActive: true });
+      
+      if (cityLocation) {
+        return { lat: cityLocation.lat, lng: cityLocation.lng };
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error getting coordinates for ${cityName}:`, error);
+      return null;
+    }
+  }
+
+  // Add a new city location (for dynamic expansion)
+  async addCityLocation(cityData: Omit<CityLocation, '_id' | 'lastUpdated'>): Promise<void> {
+    try {
+      const db = this.getDatabase();
+      const collection = db.collection<CityLocation>(COLLECTIONS.CITY_LOCATIONS);
+      
+      // Check if city already exists
+      const existing = await collection.findOne({ city: cityData.city });
+      if (!existing) {
+        await collection.insertOne({
+          ...cityData,
+          lastUpdated: new Date()
+        });
+        console.log(`✅ Added new city location: ${cityData.city}`);
+      }
+    } catch (error) {
+      console.error(`Error adding city location for ${cityData.city}:`, error);
+    }
+  }
+
   // Get location/map data for all cities with coordinates and real booking counts
   async getLocationMapData(): Promise<any[]> {
     try {
       const db = this.getDatabase();
       
-      // City coordinates mapping (Canadian cities)
-      const cityCoordinates: { [key: string]: { lat: number; lng: number } } = {
-        'Halifax': { lat: 44.6488, lng: -63.5752 },
-        'Vancouver': { lat: 49.2827, lng: -123.1207 },
-        'Ottawa': { lat: 45.4215, lng: -75.6972 },
-        'Toronto': { lat: 43.6532, lng: -79.3832 },
-        'Montreal': { lat: 45.5017, lng: -73.5673 },
-        'Calgary': { lat: 51.0447, lng: -114.0719 },
-        'Winnipeg': { lat: 49.8951, lng: -97.1384 },
-        'Quebec City': { lat: 46.8139, lng: -71.2080 },
-        'Edmonton': { lat: 53.5461, lng: -113.4938 },
-        'Saskatoon': { lat: 52.1332, lng: -106.6700 }
-      };
+      // Ensure city locations are initialized
+      await this.initializeCityLocations();
 
       // Get real booking data from last 30 days for growth calculation
       const thirtyDaysAgo = new Date();
@@ -780,30 +930,39 @@ export class BookingService {
       const cityStats = await db.collection<BookingEvent>(COLLECTIONS.BOOKINGS).aggregate(pipeline).toArray();
 
       // Combine with coordinates and calculate growth
-      const locationData = cityStats.map(stat => {
-        const coordinates = cityCoordinates[stat.city] || { lat: 0, lng: 0 };
-        
-        // Calculate growth percentage
-        let growth = '+0%';
-        if (stat.previousPeriodBookings > 0) {
-          const growthPercent = ((stat.recentBookings - stat.previousPeriodBookings) / stat.previousPeriodBookings * 100);
-          growth = growthPercent >= 0 ? `+${growthPercent.toFixed(0)}%` : `${growthPercent.toFixed(0)}%`;
-        } else if (stat.recentBookings > 0) {
-          growth = '+100%';
-        }
+      const locationData = await Promise.all(
+        cityStats.map(async (stat) => {
+          const coordinates = await this.getCityCoordinates(stat.city);
+          
+          // Skip cities without coordinates
+          if (!coordinates) {
+            console.warn(`⚠️  No coordinates found for city: ${stat.city}`);
+            return null;
+          }
+          
+          // Calculate growth percentage
+          let growth = '+0%';
+          if (stat.previousPeriodBookings > 0) {
+            const growthPercent = ((stat.recentBookings - stat.previousPeriodBookings) / stat.previousPeriodBookings * 100);
+            growth = growthPercent >= 0 ? `+${growthPercent.toFixed(0)}%` : `${growthPercent.toFixed(0)}%`;
+          } else if (stat.recentBookings > 0) {
+            growth = '+100%';
+          }
 
-        return {
-          city: stat.city,
-          lat: coordinates.lat,
-          lng: coordinates.lng,
-          bookings: stat.totalBookings,
-          users: stat.users,
-          growth,
-          recentBookings: stat.recentBookings
-        };
-      }).filter(city => city.lat !== 0 && city.lng !== 0); // Only include cities with known coordinates
+          return {
+            city: stat.city,
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+            bookings: stat.totalBookings,
+            users: stat.users,
+            growth,
+            recentBookings: stat.recentBookings
+          };
+        })
+      );
 
-      return locationData;
+      // Filter out null values (cities without coordinates)
+      return locationData.filter(city => city !== null);
     } catch (error) {
       console.error('Error fetching location map data:', error);
       return [];

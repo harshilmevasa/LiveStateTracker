@@ -54,11 +54,24 @@ export interface DashboardStats {
   BaseBookedCounter?: string;
 }
 
+export interface CityLocation {
+  _id?: string;
+  city: string;
+  country: string;
+  lat: number;
+  lng: number;
+  timezone: string;
+  region: string;
+  isActive: boolean;
+  lastUpdated: Date;
+}
+
 // Collection names
 export const COLLECTIONS = {
   BOOKINGS: 'USVisaBookings',
   CITY_STATS: 'CityStats',
   DAILY_STATS: 'DailyStats', 
   USER_STATS: 'UserStats',
-  DASHBOARD_STATS: 'DashboardStats'
+  DASHBOARD_STATS: 'DashboardStats',
+  CITY_LOCATIONS: 'CityLocations'
 } as const;

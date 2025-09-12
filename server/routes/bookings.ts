@@ -118,6 +118,35 @@ router.get('/upcoming-by-city', async (req, res) => {
   }
 });
 
-// Removed POST endpoint - this is now a read-only API
+// POST /api/bookings/add-city - Add a new city location dynamically
+router.post('/add-city', async (req, res) => {
+  try {
+    const { city, country, lat, lng, timezone, region } = req.body;
+    
+    if (!city || !country || !lat || !lng || !timezone || !region) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: city, country, lat, lng, timezone, region' 
+      });
+    }
+
+    await bookingService.addCityLocation({
+      city,
+      country,
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      timezone,
+      region,
+      isActive: true
+    });
+
+    res.json({ 
+      message: `City ${city} added successfully`,
+      city: { city, country, lat: parseFloat(lat), lng: parseFloat(lng), timezone, region }
+    });
+  } catch (error) {
+    console.error('Error adding city location:', error);
+    res.status(500).json({ error: 'Failed to add city location' });
+  }
+});
 
 export default router;
