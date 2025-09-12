@@ -1,0 +1,144 @@
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin, RefreshCw } from 'lucide-react';
+import { useApi } from '@/hooks/useApi';
+
+// Hook for fetching earliest booked appointments by city
+export const useEarliestBookedAppointments = () => {
+  return useApi<any[]>('/api/bookings/upcoming-by-city');
+};
+
+export default function CityPerformance() {
+  const { data: earliestData, loading, error, refetch } = useEarliestBookedAppointments();
+
+  const formatDate = (dateString: string) => {
+    // Parse DD/MM/YYYY format properly
+    const parts = dateString.split('/');
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JavaScript Date
+    const year = parseInt(parts[2], 10);
+    
+    const date = new Date(year, month, day);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatBookingDate = (createdAt: string) => {
+    const date = new Date(createdAt);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  if (error) {
+    return (
+      <Card className="p-6 bg-gradient-card shadow-card border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Earliest Booked Dates by City
+          </h3>
+          <button
+            onClick={() => refetch()}
+            className="p-2 hover:bg-secondary rounded-lg transition-colors"
+            title="Refresh data"
+          >
+            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Failed to load earliest appointments</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-2 text-sm text-primary hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-6 bg-gradient-card shadow-card border-border">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Earliest Booked Dates by City in Last 30 Days
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            See the top 10 earliest booked appointment by our bot in each city with when it was booked
+          </p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="p-2 hover:bg-secondary rounded-lg transition-colors"
+          title="Refresh data"
+        >
+          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-secondary/30 rounded-lg p-4 h-40"></div>
+            </div>
+          ))}
+        </div>
+      ) : earliestData && earliestData.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {earliestData.map((cityData, index) => (
+            <div key={index} className="bg-secondary/30 rounded-lg border border-border/50 p-3 hover:bg-secondary/40 transition-all duration-200">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="w-4 h-4 text-primary" />
+                <h4 className="font-semibold text-foreground">{cityData.city}</h4>
+              </div>
+              
+              {/* Header row */}
+              <div className="flex items-center justify-between py-2 px-2 bg-secondary/50 rounded border border-border/50 mb-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Appointment Date</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Booked On</span>
+              </div>
+              
+              <div className="space-y-1">
+                {cityData.appointments.slice(0, 10).map((appointment: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between py-2 px-2 bg-background/50 rounded border border-border/30 hover:bg-background/70 transition-colors">
+                    <span className="text-sm font-medium text-foreground">
+                      {formatDate(appointment.appointmentDate)}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatBookingDate(appointment.createdAt)}
+                    </span>
+                  </div>
+                ))}
+                
+                {cityData.appointments.length === 0 && (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    No appointments found
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <h4 className="text-lg font-semibold text-foreground mb-2">No Appointment Data</h4>
+          <p className="text-muted-foreground">
+            No appointments found in the last 30 days.
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+}

@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Appointment Booking Extension - Data Visualization Design System */
+
+@layer base {
+  :root {
+    /* Light theme for clean, professional look */
+    --background: 0 0% 100%;
+    --foreground: 222 15% 8%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 222 15% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 15% 8%;
+
+    /* Trust blue for primary */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 70%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 15% 8%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 35%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 15% 8%;
+
+    /* Success green */
+    --success: 142 72% 40%;
+    --success-foreground: 0 0% 100%;
+    --success-glow: 142 72% 60%;
+
+    /* Warning/urgency orange */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-success: linear-gradient(135deg, hsl(142 72% 50%), hsl(142 72% 60%));
+    --gradient-light: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 98%), hsl(210 40% 96%));
+
+    /* Shadows with glow effects */
+    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.15);
+    --shadow-success: 0 0 30px hsl(142 72% 50% / 0.15);
+    --shadow-card: 0 8px 32px hsl(220 13% 91% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222 15% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 15% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 15% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 15% 8%;
+
+    --secondary: 222 15% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 15% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 222 15% 18%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 15% 20%;
+    --input: 222 15% 18%;
+    --ring: 217 91% 60%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
