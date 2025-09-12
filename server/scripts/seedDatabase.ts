@@ -1,8 +1,21 @@
 import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
 import { BookingEvent, CityStats, UserStats, COLLECTIONS } from '../models/Booking.js';
 
-const MONGODB_URI = "mongodb+srv://Replyai:6LEMHdXQ1hIzquu4@cluster0.3d7niti.mongodb.net/ReplyAI";
-const DB_NAME = 'USVisa';
+// Load environment variables
+dotenv.config();
+
+// Get MongoDB connection details from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.DB_NAME || 'USVisa';
+
+// Validate required environment variables
+if (!MONGODB_URI) {
+  throw new Error('MONGODB_URI environment variable is required');
+}
+
+// Type assertion after validation
+const validatedMONGODB_URI: string = MONGODB_URI;
 
 const cities = ['Halifax', 'Vancouver', 'Ottawa', 'Toronto', 'Montreal', 'Calgary'];
 const visaTypes = [
@@ -96,7 +109,7 @@ const generateUserStats = (bookings: BookingEvent[]): UserStats => {
 };
 
 async function seedDatabase() {
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(validatedMONGODB_URI);
   
   try {
     await client.connect();

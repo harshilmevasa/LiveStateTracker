@@ -1,7 +1,13 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = "mongodb+srv://Replyai:6LEMHdXQ1hIzquu4@cluster0.3d7niti.mongodb.net/ReplyAI";
-const DB_NAME = 'USVisa';
+// Get MongoDB connection details from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.DB_NAME || 'USVisa';
+
+// Validate required environment variables
+if (!MONGODB_URI) {
+  throw new Error('MONGODB_URI environment variable is required');
+}
 
 let client: MongoClient;
 let db: Db;
