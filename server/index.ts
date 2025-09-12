@@ -35,14 +35,46 @@ app.use(express.json());
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app build directory
-  const distPath = path.join(__dirname, '../dist');
-  console.log('Static files path:', distPath);
-  app.use(express.static(distPath));
+  const fs = require('fs');
+  
+  // Multiple possible locations for static files
+  const possiblePaths = [
+    '/app/dist',           // Railway root
+    path.join(__dirname, '../dist'),     // Local relative
+    path.join(__dirname, '../../dist'),  // Parent directory
+    '/app/build',          // Alternative build directory
+  ];
+  
+  let distPath = null;
+  
+  // Find the first existing path
+  for (const testPath of possiblePaths) {
+    if (fs.existsSync(testPath)) {
+      distPath = testPath;
+      break;
+    }
+  }
+  
+  if (distPath) {
+    console.log('✅ Static files found at:', distPath);
+    console.log('📁 Directory contents:', fs.readdirSync(distPath).slice(0, 10));
+    app.use(express.static(distPath));
+  } else {
+    console.log('❌ No static files found. Checked paths:', possiblePaths);
+    // List current working directory contents for debugging
+    console.log('📁 Current working directory:', process.cwd());
+    console.log('📁 Current directory contents:', fs.readdirSync(process.cwd()).slice(0, 20));
+  }
 }
 
 // Routes
+console.log('🛣️  Setting up API routes');
 app.use('/api/bookings', bookingRoutes);
+
+// Add a test API route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -52,9 +84,37 @@ app.get('/health', (req, res) => {
 // Catch all handler: send back React's index.html file in production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    const indexPath = path.join(__dirname, '../dist/index.html');
-    console.log('Serving index.html from:', indexPath);
-    res.sendFile(indexPath);
+    const fs = require('fs');
+    
+    // Multiple possible locations for index.html
+    const possibleIndexPaths = [
+      '/app/dist/index.html',
+      path.join(__dirname, '../dist/index.html'),
+      path.join(__dirname, '../../dist/index.html'),
+      '/app/build/index.html'
+    ];
+    
+    let indexPath = null;
+    
+    // Find the first existing index.html
+    for (const testPath of possibleIndexPaths) {
+      if (fs.existsSync(testPath)) {
+        indexPath = testPath;
+        break;
+      }
+    }
+    
+    if (indexPath) {
+      console.log('📄 Serving index.html from:', indexPath);
+      res.sendFile(indexPath);
+    } else {
+      console.log('❌ index.html not found. Checked:', possibleIndexPaths);
+      res.status(404).send(`
+        <h1>LiveStateTracker</h1>
+        <p>Frontend files not found. API is running at <a href="/health">/health</a></p>
+        <p>API endpoints available at <a href="/api/bookings">/api/bookings</a></p>
+      `);
+    }
   });
 }
 
