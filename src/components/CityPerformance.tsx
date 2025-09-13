@@ -150,8 +150,8 @@ export default function CityPerformance() {
                           {formatDate(appointment.appointmentDate)}
                         </span>
                         {appointment.count > 1 && (
-                          <span className="px-2 py-1 text-xs font-bold bg-warning/20 text-warning border border-warning/30 rounded-full">
-                            Bulk x{appointment.count}
+                          <span className="px-1.5 py-0.5 text-xs font-bold bg-warning/20 text-warning border border-warning/30 rounded-full whitespace-nowrap">
+                            <span className="hidden sm:inline">Bulk </span>x{appointment.count}
                           </span>
                         )}
                       </div>

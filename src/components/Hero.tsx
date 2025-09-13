@@ -23,19 +23,19 @@ export default function Hero() {
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
           {/* Live stats badge */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <Badge variant="secondary" className="bg-success/20 text-success border-success/30 px-4 py-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 mt-6">
+            <Badge variant="secondary" className="bg-success/20 text-success border-success/30 px-3 py-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
                 <Users className="w-4 h-4" />
-                <span className="font-medium">{liveCount.toLocaleString()} Active Users</span>
+                <span className="font-medium text-sm">{liveCount.toLocaleString()} Active Users</span>
               </div>
             </Badge>
             
-            <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 px-4 py-2">
+            <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 px-3 py-2">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                <span className="font-medium">{todayBookings} Booked Today</span>
+                <span className="font-medium text-sm">{todayBookings} Booked Today</span>
               </div>
             </Badge>
           </div>
@@ -44,7 +44,7 @@ export default function Hero() {
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary-glow to-success-glow bg-clip-text text-transparent leading-tight">
             Need an early
             <br />
-            <span className="text-4xl md:text-6xl">Visa appointment?</span>
+            <span className="text-4xl md:text-6xl">US Visa appointment?</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
@@ -68,18 +68,24 @@ export default function Hero() {
           </div>
 
           {/* Key benefits */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 max-w-3xl mx-auto">
-            <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <Zap className="w-5 h-5 text-warning" />
-              <span className="text-foreground font-medium text-sm">Instant Notifications</span>
-            </div>
-            <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <span className="text-foreground font-medium text-sm">24/7 Monitoring</span>
-            </div>
-            <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <Users className="w-5 h-5 text-purple-500" />
-              <span className="text-foreground font-medium text-sm">Global Support</span>
+          <div className="mb-10 max-w-3xl mx-auto">
+            {/* Mobile: 2x1 grid, Desktop: single row */}
+            <div className="grid grid-cols-2 gap-3 mb-3 md:grid-cols-3 md:gap-4 md:mb-0">
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                <Zap className="w-4 h-4 text-warning flex-shrink-0" />
+                <span className="text-foreground font-medium text-xs md:text-sm">Instant Notifications</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                <TrendingUp className="w-4 h-4 text-primary flex-shrink-0" />
+                <span className="text-foreground font-medium text-xs md:text-sm">24/7 Monitoring</span>
+              </div>
+              {/* Third item - spans 2 columns on mobile, 1 on desktop */}
+              <div className="col-span-2 md:col-span-1 flex items-center justify-center">
+                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-card/50 border border-border/50 max-w-[200px] md:max-w-none md:w-full">
+                  <Users className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                  <span className="text-foreground font-medium text-xs md:text-sm">Global Support</span>
+                </div>
+              </div>
             </div>
           </div>
 
