@@ -25,8 +25,10 @@ export default function Footer() {
               <ul className="text-white space-y-3">
                 <li>
                   <a 
-                    href="/usvisa" 
+                    href="https://alertmeasap.com/usvisa" 
                     className="hover:text-green-400 hover:translate-x-1 transition-all duration-200 flex items-center gap-2 group"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <span>US Visa</span>
                     <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
@@ -34,8 +36,10 @@ export default function Footer() {
                 </li>
                 <li>
                   <a 
-                    href="/amazon" 
+                    href="https://alertmeasap.com/amazon" 
                     className="hover:text-green-400 hover:translate-x-1 transition-all duration-200 flex items-center gap-2 group"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <span>Amazon Shifts</span>
                     <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
@@ -52,8 +56,10 @@ export default function Footer() {
               <ul className="text-white space-y-3">
                 <li>
                   <a 
-                    href="/contact" 
+                    href="https://alertmeasap.com/contact" 
                     className="hover:text-green-400 hover:translate-x-1 transition-all duration-200 flex items-center gap-2 group"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <span>Contact Us</span>
                     <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
