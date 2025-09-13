@@ -42,9 +42,9 @@ const Index = () => {
       </section>
 
       {/* Live Data & City Performance Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-background" data-section="live-feed">
         <div className="container mx-auto px-6">
-          {/* Live Appointment Feed - Full Width */}
+          {/* Live Appointment Booked Feed - Full Width */}
           <div className="mb-12">
             <LiveBookingFeed />
           </div>
@@ -113,7 +113,9 @@ const Index = () => {
       <TelegramChannels />
 
       {/* Pricing */}
-      <PricingSection />
+      <div data-section="pricing">
+        <PricingSection />
+      </div>
 
       {/* FAQ */}
       <FAQ />

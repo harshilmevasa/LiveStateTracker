@@ -1114,7 +1114,7 @@ export class BookingService {
         {
           $project: {
             city: "$_id",
-            appointments: { $slice: ["$appointments", 10] },
+            appointments: { $slice: ["$appointments", 150] }, // Fetch more appointments to ensure 10 unique dates
             totalUpcoming: { $size: "$appointments" },
             _id: 0
           }

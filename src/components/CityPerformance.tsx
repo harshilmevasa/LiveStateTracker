@@ -122,16 +122,45 @@ export default function CityPerformance() {
               </div>
               
               <div className="space-y-1">
-                {cityData.appointments.slice(0, 10).map((appointment: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between py-2 px-2 bg-background/50 rounded border border-border/30 hover:bg-background/70 transition-colors">
-                    <span className="text-sm font-medium text-foreground">
-                      {formatDate(appointment.appointmentDate)}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatBookingDate(appointment.createdAt)}
-                    </span>
-                  </div>
-                ))}
+                {(() => {
+                  // Group appointments by date and count duplicates
+                  const groupedAppointments = cityData.appointments.reduce((acc: any, appointment: any) => {
+                    const dateKey = appointment.appointmentDate;
+                    if (!acc[dateKey]) {
+                      acc[dateKey] = {
+                        appointmentDate: appointment.appointmentDate,
+                        createdAt: appointment.createdAt,
+                        count: 1
+                      };
+                    } else {
+                      acc[dateKey].count++;
+                    }
+                    return acc;
+                  }, {});
+                  
+                  // Convert to array and sort by appointment date
+                  const uniqueAppointments = Object.values(groupedAppointments)
+                    .sort((a: any, b: any) => new Date(a.appointmentDate.split('/').reverse().join('-')).getTime() - new Date(b.appointmentDate.split('/').reverse().join('-')).getTime())
+                    .slice(0, 10);
+                  
+                  return uniqueAppointments.map((appointment: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between py-2 px-2 bg-background/50 rounded border border-border/30 hover:bg-background/70 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">
+                          {formatDate(appointment.appointmentDate)}
+                        </span>
+                        {appointment.count > 1 && (
+                          <span className="px-2 py-1 text-xs font-bold bg-warning/20 text-warning border border-warning/30 rounded-full">
+                            Bulk x{appointment.count}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {formatBookingDate(appointment.createdAt)}
+                      </span>
+                    </div>
+                  ));
+                })()}
                 
                 {cityData.appointments.length === 0 && (
                   <div className="text-center py-4 text-muted-foreground text-sm">

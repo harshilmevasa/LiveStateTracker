@@ -42,49 +42,83 @@ export default function Hero() {
 
           {/* Main headline */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary-glow to-success-glow bg-clip-text text-transparent leading-tight">
-            Book Appointments
+            Need an early
             <br />
-            <span className="text-4xl md:text-6xl">Lightning Fast</span>
+            <span className="text-4xl md:text-6xl">Visa appointment?</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Our Chrome extension has helped <span className="text-success font-semibold">{liveCount.toLocaleString()}+ users</span> secure 
-            <span className="text-primary font-semibold"> {totalAppointments.toLocaleString()}+ appointments</span> across Canadian visa offices.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
+            <span className="text-primary font-semibold">Skip the endless checking</span> for US Visa appointments! 
+            We monitor slots <span className="text-success font-semibold">24/7</span> and alert you the moment appointments become available.
           </p>
 
+          {/* Highlighted User Count */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-success/10 via-primary/10 to-success/10 rounded-2xl border border-success/20 shadow-lg max-w-md mx-auto">
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-success mb-2">
+                {liveCount.toLocaleString()}+
+              </div>
+              <div className="text-lg font-semibold text-foreground mb-1">
+                Users Trust Alert Me ASAP
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Join thousands who secured their appointments
+              </div>
+            </div>
+          </div>
+
           {/* Key benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <Zap className="w-6 h-6 text-warning" />
-              <span className="text-foreground font-medium">Instant Notifications</span>
+              <Zap className="w-5 h-5 text-warning" />
+              <span className="text-foreground font-medium text-sm">Instant Notifications</span>
             </div>
             <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <Shield className="w-6 h-6 text-success" />
-              <span className="text-foreground font-medium">Automated Booking</span>
+              <TrendingUp className="w-5 h-5 text-primary" />
+              <span className="text-foreground font-medium text-sm">24/7 Monitoring</span>
             </div>
             <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
-              <TrendingUp className="w-6 h-6 text-primary" />
-              <span className="text-foreground font-medium">23.4% Monthly Growth</span>
+              <Users className="w-5 h-5 text-purple-500" />
+              <span className="text-foreground font-medium text-sm">Global Support</span>
             </div>
           </div>
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 px-8 py-4 text-lg font-semibold">
+            <Button 
+              size="lg" 
+              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 px-8 py-4 text-lg font-semibold"
+              onClick={() => {
+                const pricingSection = document.querySelector('[data-section="pricing"]');
+                if (pricingSection) {
+                  pricingSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               Get Extension Now
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             
-            <Button variant="outline" size="lg" className="border-border hover:bg-secondary/50 px-8 py-4 text-lg">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-border hover:bg-secondary/50 px-8 py-4 text-lg"
+              onClick={() => {
+                const liveDataSection = document.querySelector('[data-section="live-feed"]');
+                if (liveDataSection) {
+                  liveDataSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               View Live Data
             </Button>
           </div>
 
           {/* Social proof */}
           <div className="mt-12 pt-8 border-t border-border/30">
-            <p className="text-sm text-muted-foreground mb-4">Trusted by thousands across Canada</p>
+            <p className="text-sm text-muted-foreground mb-4">Trusted by thousands across the world</p>
             <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
-              <span>🇨🇦 Halifax • Vancouver • Ottawa • Toronto • Montreal • Calgary</span>
+              <span> Canada • Dubai • Abu Dhabi • Turkey • India • Pakistan • Bangladesh • Algeria and more</span>
             </div>
           </div>
         </div>

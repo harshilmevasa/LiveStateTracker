@@ -51,7 +51,7 @@ export default function LiveBookingFeed() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${connected ? 'bg-success animate-pulse' : 'bg-muted-foreground'}`}></div>
-          Live Appointment Feed
+          Live Appointment Booked Feed
           {!connected && (
             <span className="text-xs text-muted-foreground">(Offline)</span>
           )}
