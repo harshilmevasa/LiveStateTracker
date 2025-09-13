@@ -23,7 +23,11 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || ["http://localhost:5173", "http://localhost:8080"],
+    origin: process.env.FRONTEND_URL || [
+      "http://localhost:5173", 
+      "http://localhost:8080",
+      "https://live.alertmeasap.com"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -32,7 +36,11 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || ["http://localhost:5173", "http://localhost:8080"],
+  origin: process.env.FRONTEND_URL || [
+    "http://localhost:5173", 
+    "http://localhost:8080",
+    "https://live.alertmeasap.com"
+  ],
   credentials: true
 }));
 app.use(express.json());
