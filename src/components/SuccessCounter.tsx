@@ -137,7 +137,7 @@ export default function SuccessCounter() {
             <div className="text-center p-4 bg-secondary/30 rounded-lg border border-border/50">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Download className="w-5 h-5 text-blue-500" />
-                <h4 className="font-semibold text-foreground">Today</h4>
+                <h4 className="font-semibold text-foreground">Last 24 Hours</h4>
               </div>
               <p className="text-2xl font-bold text-blue-500">{stats?.downloadsToday || 23}</p>
               <p className="text-sm text-muted-foreground">Downloaded today</p>
@@ -146,7 +146,7 @@ export default function SuccessCounter() {
             <div className="text-center p-4 bg-secondary/30 rounded-lg border border-border/50">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-purple-500" />
-                <h4 className="font-semibold text-foreground">This Week</h4>
+                <h4 className="font-semibold text-foreground">Last 7 Days</h4>
               </div>
               <p className="text-2xl font-bold text-purple-500">{stats?.downloadsThisWeek || 157}</p>
               <p className="text-sm text-muted-foreground">Weekly downloads</p>
@@ -155,7 +155,7 @@ export default function SuccessCounter() {
             <div className="text-center p-4 bg-secondary/30 rounded-lg border border-border/50">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Trophy className="w-5 h-5 text-green-500" />
-                <h4 className="font-semibold text-foreground">This Month</h4>
+                <h4 className="font-semibold text-foreground">Last 30 Days</h4>
               </div>
               <p className="text-2xl font-bold text-green-500">{stats?.newUsersThisMonth?.toLocaleString() || '3,298'}</p>
               <p className="text-sm text-muted-foreground">Downloaded this month</p>
