@@ -17,7 +17,7 @@ export const setupSocketHandlers = (io: Server) => {
     socket.on('request:initial-data', async () => {
       try {
         const [recentBookings, stats, cityStats] = await Promise.all([
-          bookingService.getRecentBookings(10),
+          bookingService.getRecentBookings(10), // Always sanitized - no emails
           bookingService.getOverallStats(),
           bookingService.getCityStats()
         ]);
@@ -90,8 +90,11 @@ const startDatabasePolling = (io: Server) => {
             const newBooking = change.fullDocument;
             console.log(`🎯 New appointment booking detected for ${newBooking.location} on ${newBooking.appointmentDate}`);
             
-            // Broadcast the new booking immediately
-            io.emit('booking:new', newBooking);
+            // SECURITY: Remove email before broadcasting to frontend
+            const { email, ...sanitizedBooking } = newBooking;
+            
+            // Broadcast the sanitized booking immediately
+            io.emit('booking:new', sanitizedBooking);
             
             // Update total count
             lastTotalCount++;
@@ -171,9 +174,9 @@ const startDatabasePolling = (io: Server) => {
           // Get recent bookings to find new ones
           const newBookingsCount = currentTotalCount - lastTotalCount;
           if (newBookingsCount > 0) {
-            const recentBookings = await bookingService.getRecentBookings(Math.min(newBookingsCount, 10));
+            const recentBookings = await bookingService.getRecentBookings(Math.min(newBookingsCount, 10)); // Always sanitized
             
-            // Broadcast new bookings
+            // Broadcast new bookings (already sanitized)
             recentBookings.slice(0, newBookingsCount).forEach(booking => {
               io.emit('booking:new', booking);
               console.log(`📊 Broadcasting new appointment for ${booking.location} on ${booking.appointmentDate}`);

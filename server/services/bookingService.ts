@@ -46,12 +46,12 @@ export class BookingService {
     };
   }
 
-  // Get recent booking events for live feed
-  async getRecentBookings(limit: number = 10): Promise<BookingEvent[]> {
+  // Get recent booking events for live feed (emails always excluded for security)
+  async getRecentBookings(limit: number = 10): Promise<Omit<BookingEvent, 'email'>[]> {
     try {
       const db = this.getDatabase();
       
-      // Use aggregation to properly handle invalid dates
+      // Use aggregation to properly handle invalid dates and exclude emails
       const bookings = await db
         .collection<BookingEvent>(COLLECTIONS.BOOKINGS)
         .aggregate([
@@ -71,13 +71,14 @@ export class BookingService {
           },
           {
             $project: {
-              createdAtDate: 0 // Remove the helper field
+              createdAtDate: 0, // Remove the helper field
+              email: 0 // SECURITY: Never send email addresses to frontend
             }
           }
         ])
         .toArray();
       
-      return bookings as BookingEvent[];
+      return bookings as Omit<BookingEvent, 'email'>[];
     } catch (error) {
       console.error('Error fetching recent bookings:', error);
       throw error;

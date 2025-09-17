@@ -3,7 +3,6 @@ import { io, Socket } from 'socket.io-client';
 
 interface BookingEvent {
   _id?: string;
-  email: string;
   appointmentDate: string;
   appointmentTime: string;
   location: string;
@@ -37,7 +36,7 @@ interface CityStats {
 }
 
 interface SocketData {
-  recentBookings: BookingEvent[];
+  recentBookings: BookingEvent[]; // BookingEvent already excludes email
   stats: UserStats | null;
   cityStats: CityStats[];
 }
@@ -72,7 +71,7 @@ export const useSocket = () => {
 
   useEffect(() => {
     const connectSocket = () => {
-      console.log('🔌 Attempting to connect to WebSocket server at:', SOCKET_URL);
+      // console.log('🔌 Attempting to connect to WebSocket server at:', SOCKET_URL);
       const newSocket = io(SOCKET_URL, {
         transports: ['websocket', 'polling'],
         timeout: 20000,
@@ -80,7 +79,7 @@ export const useSocket = () => {
       });
 
       newSocket.on('connect', () => {
-        console.log('🔌 Connected to WebSocket server');
+        // console.log('🔌 Connected to WebSocket server');
         setConnected(true);
         setSocket(newSocket);
         reconnectAttempts.current = 0;
@@ -90,13 +89,13 @@ export const useSocket = () => {
       });
 
       newSocket.on('disconnect', (reason) => {
-        console.log('🔌 Disconnected from WebSocket server:', reason);
+        // console.log('🔌 Disconnected from WebSocket server:', reason);
         setConnected(false);
         
         // Auto-reconnect logic
         if (reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
-          console.log(`🔄 Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})`);
+          // console.log(`🔄 Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})`);
           setTimeout(connectSocket, 2000 * reconnectAttempts.current);
         }
       });
@@ -108,7 +107,7 @@ export const useSocket = () => {
 
       // Handle initial data
       newSocket.on('data:initial', (data: SocketData) => {
-        console.log('📊 Received initial data:', data);
+       // // console.log('📊 Received initial data:', data);
         setRecentBookings(data.recentBookings || []);
         setStats(data.stats);
         setCityStats(data.cityStats || []);
@@ -116,7 +115,7 @@ export const useSocket = () => {
 
       // Handle new booking events
       newSocket.on('booking:new', (booking: BookingEvent) => {
-        console.log('🎯 New booking received:', booking);
+        // console.log(`🎯 New booking received: ${booking.location} on ${booking.appointmentDate} at ${booking.appointmentTime}`);
         
         setRecentBookings(prev => {
           const updated = [booking, ...prev.slice(0, 9)];
