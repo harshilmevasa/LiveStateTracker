@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
+import { socket as socketInstance } from '../lib/socket';
 
 interface BookingEvent {
   _id?: string;
@@ -59,109 +60,97 @@ const getSocketUrl = () => {
 
 const SOCKET_URL = getSocketUrl();
 
-export const useSocket = () => {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [connected, setConnected] = useState(false);
+const useSocket = () => {
+  const [socket, setSocket] = useState<Socket | null>(socketInstance);
+  const [connected, setConnected] = useState(socketInstance.connected);
   const [recentBookings, setRecentBookings] = useState<BookingEvent[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [cityStats, setCityStats] = useState<CityStats[]>([]);
   const [newBookingCount, setNewBookingCount] = useState(0);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
 
   useEffect(() => {
-    const connectSocket = () => {
-      // console.log('🔌 Attempting to connect to WebSocket server at:', SOCKET_URL);
-      const newSocket = io(SOCKET_URL, {
-        transports: ['websocket', 'polling'],
-        timeout: 20000,
-        forceNew: true
-      });
+    if (socketInstance.connected) {
+      // If already connected, request initial data
+      socketInstance.emit('request:initial-data');
+    } else {
+      // Otherwise, connect
+      socketInstance.connect();
+    }
 
-      newSocket.on('connect', () => {
-        // console.log('🔌 Connected to WebSocket server');
-        setConnected(true);
-        setSocket(newSocket);
-        reconnectAttempts.current = 0;
-        
-        // Request initial data
-        newSocket.emit('request:initial-data');
-      });
-
-      newSocket.on('disconnect', (reason) => {
-        // console.log('🔌 Disconnected from WebSocket server:', reason);
-        setConnected(false);
-        
-        // Auto-reconnect logic
-        if (reconnectAttempts.current < maxReconnectAttempts) {
-          reconnectAttempts.current++;
-          // console.log(`🔄 Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})`);
-          setTimeout(connectSocket, 2000 * reconnectAttempts.current);
-        }
-      });
-
-      newSocket.on('connect_error', (error) => {
-        console.error('🔌 Connection error:', error);
-        setConnected(false);
-      });
-
-      // Handle initial data
-      newSocket.on('data:initial', (data: SocketData) => {
-       // // console.log('📊 Received initial data:', data);
-        setRecentBookings(data.recentBookings || []);
-        setStats(data.stats);
-        setCityStats(data.cityStats || []);
-      });
-
-      // Handle new booking events
-      newSocket.on('booking:new', (booking: BookingEvent) => {
-        // console.log(`🎯 New booking received: ${booking.location} on ${booking.appointmentDate} at ${booking.appointmentTime}`);
-        
-        setRecentBookings(prev => {
-          const updated = [booking, ...prev.slice(0, 9)];
-          return updated;
-        });
-        
-        setNewBookingCount(prev => prev + 1);
-        
-        // Update stats immediately for any new appointment booking
-        setStats(prev => prev ? {
-          ...prev,
-          totalAppointmentsBooked: prev.totalAppointmentsBooked + 1
-        } : null);
-      });
-
-      // Handle stats updates
-      newSocket.on('data:stats', (newStats: UserStats) => {
-        setStats(newStats);
-      });
-
-      // Handle city stats updates
-      newSocket.on('data:city-stats', (newCityStats: CityStats[]) => {
-        setCityStats(newCityStats);
-      });
-
-      // Handle errors
-      newSocket.on('error', (error: { message: string }) => {
-        console.error('🔌 Socket error:', error.message);
-      });
-
-      return newSocket;
+    const onConnect = () => {
+      // console.log('🔌 Connected to WebSocket server');
+      setConnected(true);
+      setSocket(socketInstance);
+      // Request initial data on connect
+      socketInstance.emit('request:initial-data');
     };
 
-    const socketInstance = connectSocket();
+    const onDisconnect = (reason: Socket.DisconnectReason) => {
+      // console.log('🔌 Disconnected from WebSocket server:', reason);
+      setConnected(false);
+    };
+
+    const onConnectError = (error: Error) => {
+      console.error('🔌 Connection error:', error);
+      setConnected(false);
+    };
+
+    const onInitialData = (data: SocketData) => {
+      // console.log('📊 Received initial data:', data);
+      setRecentBookings(data.recentBookings || []);
+      setStats(data.stats);
+      setCityStats(data.cityStats || []);
+    };
+
+    const onNewBooking = (booking: BookingEvent) => {
+      // console.log(`🎯 New booking received: ${booking.location} on ${booking.appointmentDate} at ${booking.appointmentTime}`);
+      setRecentBookings(prev => [booking, ...prev.slice(0, 9)]);
+      setNewBookingCount(prev => prev + 1);
+      setStats(prev => prev ? {
+        ...prev,
+        totalAppointmentsBooked: prev.totalAppointmentsBooked + 1
+      } : null);
+    };
+
+    const onStatsUpdate = (newStats: UserStats) => {
+      setStats(newStats);
+    };
+
+    const onCityStatsUpdate = (newCityStats: CityStats[]) => {
+      setCityStats(newCityStats);
+    };
+
+    const onError = (error: { message: string }) => {
+      console.error('🔌 Socket error:', error.message);
+    };
+
+    // Register event listeners
+    socketInstance.on('connect', onConnect);
+    socketInstance.on('disconnect', onDisconnect);
+    socketInstance.on('connect_error', onConnectError);
+    socketInstance.on('data:initial', onInitialData);
+    socketInstance.on('booking:new', onNewBooking);
+    socketInstance.on('data:stats', onStatsUpdate);
+    socketInstance.on('data:city-stats', onCityStatsUpdate);
+    socketInstance.on('error', onError);
 
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
+      // Cleanup: remove event listeners
+      socketInstance.off('connect', onConnect);
+      socketInstance.off('disconnect', onDisconnect);
+      socketInstance.off('connect_error', onConnectError);
+      socketInstance.off('data:initial', onInitialData);
+      socketInstance.off('booking:new', onNewBooking);
+      socketInstance.off('data:stats', onStatsUpdate);
+      socketInstance.off('data:city-stats', onCityStatsUpdate);
+      socketInstance.off('error', onError);
     };
   }, []);
 
   // Method to manually request fresh data
   const refreshData = () => {
-    if (socket && connected) {
-      socket.emit('request:initial-data');
+    if (socketInstance && socketInstance.connected) {
+      socketInstance.emit('request:initial-data');
     }
   };
 
@@ -175,3 +164,5 @@ export const useSocket = () => {
     resetNewBookingCount: () => setNewBookingCount(0)
   };
 };
+
+export { useSocket, getSocketUrl };
