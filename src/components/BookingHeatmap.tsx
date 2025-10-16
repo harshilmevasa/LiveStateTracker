@@ -46,10 +46,22 @@ const getIntensityClass = (bookings: number) => {
   return 'bg-success shadow-success/50';
 };
 
-const months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
+// Generates month labels starting from a specific month and year for 12 months
+const generateMonthLabels = (startMonth: number, startYear: number) => {
+  const labels = [];
+  const date = new Date(startYear, startMonth);
+  const monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  
+  for (let i = 0; i < 12; i++) {
+    labels.push(monthNames[date.getMonth()]);
+    date.setMonth(date.getMonth() + 1);
+  }
+  
+  return labels;
+};
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -58,43 +70,52 @@ export default function BookingHeatmap() {
   const { stats } = useSocket();
   const [selectedDay, setSelectedDay] = useState<any>(null);
 
-  // Use API data if available, otherwise fallback data
-  const heatmapData = apiHeatmapData && apiHeatmapData.length > 0 
-    ? apiHeatmapData 
-    : generateFallbackHeatmapData();
+  // useBookingHeatmap hook might return data for more than a year,
+  // so we need to filter it to the last 365 days for consistency.
+  const processedHeatmapData = (apiHeatmapData && apiHeatmapData.length > 0
+      ? apiHeatmapData
+      : generateFallbackHeatmapData()
+    ).slice(-365);
 
   // Calculate stats - use real total from WebSocket stats (includes BaseBookedCounter)
-  const totalBookings = stats?.totalAppointmentsBooked || heatmapData.reduce((sum, day) => sum + day.bookings, 0);
-  const hotDays = heatmapData.filter(day => day.isHotDay).length;
+  const totalBookings = stats?.totalAppointmentsBooked || processedHeatmapData.reduce((sum, day) => sum + day.bookings, 0);
+  const hotDays = processedHeatmapData.filter(day => day.isHotDay).length;
   const avgDaily = Math.round(totalBookings / 365);
-  const maxDay = Math.max(...heatmapData.map(day => day.bookings));
+  const maxDay = Math.max(...processedHeatmapData.map(day => day.bookings));
 
-  // Organize data by weeks for display
-  const weeks = [];
-  let currentWeek = [];
-  const startDate = new Date(heatmapData[0].date);
-  const startDay = startDate.getDay();
+  // -- REVISED HEATMAP LOGIC --
+  const monthNames = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+  const heatmapStartDate = new Date('2025-09-01T12:00:00Z');
+  const dataMap = new Map(processedHeatmapData.map(item => [item.date, item]));
 
-  // Add empty cells for the first week
-  for (let i = 0; i < startDay; i++) {
-    currentWeek.push(null);
+  const days = [];
+  const monthPositions: { label: string; weekIndex: number }[] = [];
+  
+  let currentDay = new Date(heatmapStartDate);
+  currentDay.setDate(currentDay.getDate() - currentDay.getDay()); // Start from the preceding Sunday
+
+  // Generate all 371 days (53 weeks) for the grid
+  for (let i = 0; i < 53 * 7; i++) {
+    const dateString = currentDay.toISOString().split('T')[0];
+    days.push(dataMap.get(dateString) || { date: dateString, bookings: 0, isHotDay: false });
+    currentDay.setDate(currentDay.getDate() + 1);
   }
 
-  heatmapData.forEach((day, index) => {
-    currentWeek.push(day);
-    
-    if (currentWeek.length === 7) {
-      weeks.push([...currentWeek]);
-      currentWeek = [];
-    }
-  });
+  // Determine month label positions
+  let lastMonth = -1;
+  for (let i = 0; i < 53; i++) {
+    const firstDayOfWeek = days[i * 7];
+    if (firstDayOfWeek) {
+        const date = new Date(firstDayOfWeek.date + 'T12:00:00Z');
+        const month = date.getMonth();
+        // Find if the first of the month appears in this week
+        const firstOfMonthInWeek = days.slice(i * 7, i * 7 + 7).some(d => d && new Date(d.date + 'T12:00:00Z').getDate() === 1);
 
-  // Add remaining days to last week
-  if (currentWeek.length > 0) {
-    while (currentWeek.length < 7) {
-      currentWeek.push(null);
+        if ((firstOfMonthInWeek || i === 0) && month !== lastMonth) {
+            monthPositions.push({ label: monthNames[month], weekIndex: i });
+            lastMonth = month;
+        }
     }
-    weeks.push(currentWeek);
   }
 
   return (
@@ -144,61 +165,57 @@ export default function BookingHeatmap() {
       </div>
 
       {/* Heatmap */}
-      <div className="space-y-4">
-        {/* Month labels */}
-        <div className="flex justify-between text-xs text-muted-foreground px-4">
-          {months.map(month => (
-            <span key={month}>{month}</span>
-          ))}
-        </div>
-
+      <div className="space-y-2">
         <TooltipProvider>
-          <div className="flex gap-1">
+          <div className="grid grid-cols-[auto,1fr] gap-x-4">
             {/* Weekday labels */}
-            <div className="flex flex-col gap-1 mr-2">
-              <div className="h-3"></div> {/* Spacer for month row */}
-              {weekdays.map((day, index) => (
-                <div key={day} className="h-3 flex items-center">
-                  {index % 2 === 1 && (
-                    <span className="text-xs text-muted-foreground text-right w-8">{day}</span>
-                  )}
-                </div>
-              ))}
+            <div className="flex flex-col text-xs text-muted-foreground mt-8 justify-around">
+              <span className="h-3">Mon</span>
+              <span className="h-3">Wed</span>
+              <span className="h-3">Fri</span>
             </div>
 
             {/* Heatmap grid */}
-            <div className="flex gap-1 overflow-x-auto">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
-                  {week.map((day, dayIndex) => (
-                    <Tooltip key={`${weekIndex}-${dayIndex}`}>
-                      <TooltipTrigger asChild>
-                        <div
-                          className={`w-3 h-3 rounded-sm cursor-pointer transition-all duration-200 hover:scale-110 ${
-                            day ? getIntensityClass(day.bookings) : 'bg-transparent'
-                          } ${day?.isHotDay ? 'ring-1 ring-warning' : ''}`}
-                          onClick={() => setSelectedDay(day)}
-                        />
-                      </TooltipTrigger>
-                      {day && (
-                        <TooltipContent>
-                          <div className="text-center">
-                            <p className="font-semibold">{day.bookings} bookings</p>
-                            <p className="text-xs text-muted-foreground">{day.date}</p>
-                            {day.isHotDay && <p className="text-xs text-warning">🔥 Hot Day!</p>}
-                          </div>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  ))}
-                </div>
-              ))}
+            <div className="relative overflow-x-auto py-1">
+              {/* Month labels positioned absolutely */}
+              <div className="absolute top-0 left-0 flex h-4 text-xs text-muted-foreground">
+                {monthPositions.map(({ label, weekIndex }) => (
+                  <div key={label} style={{ position: 'absolute', left: `${weekIndex * 15.5}px`, width: '64px', textAlign: 'center' }}>
+                    {label}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="grid grid-flow-col grid-rows-7 gap-1 pt-6">
+                {days.map((day, index) => (
+                  <Tooltip key={index}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`w-3 h-3 rounded-sm cursor-pointer transition-all duration-200 hover:scale-110 ${
+                          day ? getIntensityClass(day.bookings) : 'bg-secondary/10'
+                        } ${day?.isHotDay ? 'ring-1 ring-warning' : ''}`}
+                        onClick={() => setSelectedDay(day)}
+                      />
+                    </TooltipTrigger>
+                    {day && day.bookings > 0 && (
+                      <TooltipContent>
+                        <div className="text-center">
+                          <p className="font-semibold">{day.bookings} bookings</p>
+                          <p className="text-xs text-muted-foreground">{day.date}</p>
+                          {day.isHotDay && <p className="text-xs text-warning">🔥 Hot Day!</p>}
+                        </div>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                ))}
+              </div>
             </div>
           </div>
         </TooltipProvider>
+      </div>
 
-        {/* Legend */}
-        <div className="flex items-center justify-between pt-4 border-t border-border/30">
+      {/* Legend */}
+      <div className="flex items-center justify-between pt-4 border-t border-border/30">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Less</span>
             <div className="flex gap-1">
@@ -216,7 +233,6 @@ export default function BookingHeatmap() {
             <span>Consistent daily performance</span>
           </div>
         </div>
-      </div>
 
       {/* Selected day info */}
       {selectedDay && (

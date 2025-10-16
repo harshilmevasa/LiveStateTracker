@@ -366,7 +366,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ className }) => {
           )}
 
           {/* City list */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity duration-300 ${loading ? 'opacity-75' : 'opacity-100'}`}>
+          <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-opacity duration-300 ${loading ? 'opacity-75' : 'opacity-100'}`}>
             {locationData?.map(city => (
               <div 
                 key={city.city} 

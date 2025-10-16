@@ -86,7 +86,7 @@ export default function CityPerformance() {
             Earliest Booked Dates by City in Last 30 Days
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            See the top 10 earliest booked appointment by our bot in each city with when it was booked
+            See the earliest booked appointment by our bot in each city with when it was booked
           </p>
         </div>
         <button
