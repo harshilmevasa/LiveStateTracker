@@ -70,8 +70,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ className }) => {
       if (map.current) {
         const isMobile = window.innerWidth < 768;
         const mapConfig = isMobile 
-          ? { zoom: 4.0, center: [-118, 50] as [number, number] } // Focus on Vancouver and Calgary for mobile
-          : { zoom: 3.6, center: [-96, 47] as [number, number] }; // Full view for desktop
+          ? { zoom: 3.5, center: [-98, 55] as [number, number] } // Tighter focus on Canada for mobile
+          : { zoom: 1.5, center: [-25, 20] as [number, number] }; // Global view for desktop, shifted to show Africa/Europe more centrally
         
         map.current.flyTo({
           center: mapConfig.center,
@@ -97,8 +97,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ className }) => {
       // Responsive map settings
       const isMobile = window.innerWidth < 768;
       const mapConfig = isMobile 
-        ? { zoom: 4.0, center: [-118, 50] as [number, number] } // Focus on Vancouver and Calgary for mobile
-        : { zoom: 3.6, center: [-96, 47] as [number, number] }; // Full view for desktop
+        ? { zoom: 3.5, center: [-98, 55] as [number, number] } // Tighter focus on Canada for mobile
+        : { zoom: 1.5, center: [-25, 20] as [number, number] }; // Global view for desktop, shifted to show Africa/Europe more centrally
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
@@ -306,8 +306,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ className }) => {
                 if (map.current) {
                   const isMobile = window.innerWidth < 768;
                   const resetConfig = isMobile 
-                    ? { zoom: 4.0, center: [-118, 50] as [number, number] } // Focus on Vancouver and Calgary for mobile
-                    : { zoom: 3.6, center: [-96, 47] as [number, number] }; // Full view for desktop
+                    ? { zoom: 3.5, center: [-98, 55] as [number, number] } // Tighter focus on Canada for mobile
+                    : { zoom: 1.5, center: [-25, 20] as [number, number] }; // Global view for desktop, shifted to show Africa/Europe more centrally
                   
                   map.current.flyTo({
                     center: resetConfig.center,

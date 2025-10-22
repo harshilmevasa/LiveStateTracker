@@ -32,6 +32,7 @@ export default function SuccessCounter() {
   const totalBookings = stats?.totalAppointmentsBooked || 42891;
   const todayBookings = stats?.activeToday || 187;
   const thisWeekBookings = Math.floor(todayBookings * 7.2) || 1247; // Estimate
+  const liveUserCount = stats?.totalUsers || 15247;
 
   // Calculate progress to next milestone
   const nextAchievement = achievements.find(achievement => totalBookings < achievement.threshold);
@@ -220,7 +221,7 @@ export default function SuccessCounter() {
         {/* Call to action */}
         <div className="text-center mt-8 p-4 bg-primary/10 rounded-lg border border-primary/20">
           <p className="text-foreground font-medium mb-2">
-            Join {(15247).toLocaleString()}+ users who trust our bot
+            Join {liveUserCount.toLocaleString()}+ users who trust our bot
           </p>
           <p className="text-sm text-muted-foreground">
             Every number above represents someone who saved months of waiting time

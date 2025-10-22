@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import Header from '@/components/Header';
 import StatsCards from '@/components/StatsCards';
 import LiveBookingFeed from '@/components/LiveBookingFeed';
 import CityPerformance from '@/components/CityPerformance';
@@ -15,6 +16,8 @@ import Footer from '@/components/Footer';
 const Index = () => {
   return (
     <main className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
       <Hero />
       

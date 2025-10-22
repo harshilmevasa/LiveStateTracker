@@ -11,7 +11,7 @@ export default function StatsCards() {
     {
       title: 'Total Users',
       value: stats?.totalUsers?.toLocaleString() || '15,247',
-      change: 'Active users',
+      change: 'Total users',
       changeType: 'increase' as const,
       icon: Users,
       description: 'Extension users worldwide'

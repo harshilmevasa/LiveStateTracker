@@ -12,7 +12,7 @@ export default function Hero() {
   const totalAppointments = stats?.totalAppointmentsBooked || 42891;
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-light overflow-hidden">
+    <section className="relative min-h-[calc(100vh-80px)] flex items-center justify-center bg-gradient-light overflow-hidden">
       {/* Background grid pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
@@ -28,7 +28,7 @@ export default function Hero() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
                 <Users className="w-4 h-4" />
-                <span className="font-medium text-sm">{liveCount.toLocaleString()} Active Users</span>
+                <span className="font-medium text-sm">{liveCount.toLocaleString()} Total Users</span>
               </div>
             </Badge>
             
