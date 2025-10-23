@@ -1036,7 +1036,7 @@ export class BookingService {
         },
         {
           $group: {
-            _id: "$location",
+            _id: { $toUpper: "$location" },
             appointments: {
               $push: {
                 appointmentDate: "$appointmentDate",
@@ -1057,7 +1057,7 @@ export class BookingService {
         {
           $project: {
             city: "$_id",
-            appointments: { $slice: ["$appointments", 150] }, // Fetch more appointments to ensure 10 unique dates
+            appointments: { $slice: ["$appointments", 2000] }, // Fetch more appointments to ensure 10 unique dates
             totalUpcoming: { $size: "$appointments" },
             _id: 0
           }
