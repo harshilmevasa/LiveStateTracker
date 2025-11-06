@@ -37,7 +37,6 @@ export interface UserStats {
   activeToday: number;
   appointmentsThisWeek: number;
   appointmentsThisMonth: number;
-  appointmentsLastMonth: number;
   newUsersThisMonth: number;
   downloadsToday: number;
   downloadsThisWeek: number;

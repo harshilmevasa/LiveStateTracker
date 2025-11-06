@@ -68,11 +68,11 @@ export default function TrendChart() {
     ? apiTrendData 
     : generateFallbackTrendData();
 
-  const currentMonthBookings = stats?.appointmentsThisMonth ?? trendData[trendData.length - 1]?.bookings ?? 0;
-  const previousMonthBookings = stats?.appointmentsLastMonth ?? trendData[trendData.length - 2]?.bookings ?? 0;
+  const currentMonthBookings = trendData[trendData.length - 1]?.bookings || 0;
+  const previousMonthBookings = trendData[trendData.length - 2]?.bookings || 0;
   const growth = previousMonthBookings > 0 
     ? ((currentMonthBookings - previousMonthBookings) / previousMonthBookings * 100).toFixed(1)
-    : currentMonthBookings > 0 ? '100.0' : '0.0';
+    : '0';
   
   // Use real total from WebSocket stats (includes BaseBookedCounter)
   const totalBookings = stats?.totalAppointmentsBooked || trendData[trendData.length - 1]?.cumulativeBookings || 0;
