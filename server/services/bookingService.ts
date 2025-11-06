@@ -124,22 +124,35 @@ export class BookingService {
       const now = new Date();
       const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      // Correctly handle month-over-month comparison
+      const dayOfMonth = now.getDate();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const previousMonth = new Date(now);
+      previousMonth.setMonth(previousMonth.getMonth() - 1);
+      const previousMonthStart = new Date(previousMonth.getFullYear(), previousMonth.getMonth(), 1);
+      const previousMonthEnd = new Date(previousMonth.getFullYear(), previousMonth.getMonth(), dayOfMonth);
 
       const pipeline = [
+        this.getCreatedAtDateStage(),
         {
           $facet: {
             'total': [{ $count: 'count' }],
             'activeToday': [
-              { $match: { createdAt: { $gte: last24Hours.toISOString() } } },
+              { $match: { createdAtDate: { $gte: last24Hours } } },
               { $count: 'count' }
             ],
             'appointmentsThisWeek': [
-              { $match: { createdAt: { $gte: last7Days.toISOString() } } },
+              { $match: { createdAtDate: { $gte: last7Days } } },
               { $count: 'count' }
             ],
             'appointmentsThisMonth': [
-              { $match: { createdAt: { $gte: last30Days.toISOString() } } },
+              { $match: { createdAtDate: { $gte: currentMonthStart } } },
+              { $count: 'count' }
+            ],
+            'appointmentsLastMonth': [
+              { $match: { createdAtDate: { $gte: previousMonthStart, $lt: previousMonthEnd } } },
               { $count: 'count' }
             ]
           }
@@ -149,7 +162,8 @@ export class BookingService {
             totalBookings: { $ifNull: [{ $arrayElemAt: ['$total.count', 0] }, 0] },
             activeToday: { $ifNull: [{ $arrayElemAt: ['$activeToday.count', 0] }, 0] },
             appointmentsThisWeek: { $ifNull: [{ $arrayElemAt: ['$appointmentsThisWeek.count', 0] }, 0] },
-            appointmentsThisMonth: { $ifNull: [{ $arrayElemAt: ['$appointmentsThisMonth.count', 0] }, 0] }
+            appointmentsThisMonth: { $ifNull: [{ $arrayElemAt: ['$appointmentsThisMonth.count', 0] }, 0] },
+            appointmentsLastMonth: { $ifNull: [{ $arrayElemAt: ['$appointmentsLastMonth.count', 0] }, 0] }
           }
         },
         {
@@ -182,6 +196,8 @@ export class BookingService {
         activeToday: stats.activeToday,
         appointmentsThisWeek: stats.appointmentsThisWeek,
         appointmentsThisMonth: stats.appointmentsThisMonth,
+        // Add the new stat for comparison
+        appointmentsLastMonth: stats.appointmentsLastMonth, 
         newUsersThisMonth: parseInt(dashboardDoc.NewUsersThisMonth || '2847', 10),
         downloadsToday: parseInt(dashboardDoc.DownloadsToday || '23', 10),
         downloadsThisWeek: parseInt(dashboardDoc.DownloadsThisWeek || '157', 10),
@@ -207,6 +223,7 @@ export class BookingService {
         activeToday: 187,
         appointmentsThisWeek: 0,
         appointmentsThisMonth: 0,
+        appointmentsLastMonth: 0,
         newUsersThisMonth: 2847,
         downloadsToday: 23,
         downloadsThisWeek: 157,
@@ -975,6 +992,8 @@ export class BookingService {
       const db = this.getDatabase();
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0); // Use UTC for consistency
 
       const pipeline = [
         {
@@ -1025,6 +1044,7 @@ export class BookingService {
         {
           $match: {
             createdAtDate: { $gte: oneMonthAgo },
+            appointmentDateTime: { $gte: today },
             location: { $exists: true, $ne: null },
             $expr: { $ne: ["$location", ""] },
             appointmentDate: { $exists: true, $ne: null },
